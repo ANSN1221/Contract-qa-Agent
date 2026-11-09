@@ -22,7 +22,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pymupdf
-from contract_qa.text import normalize_for_match
 
 ROOT = Path(__file__).resolve().parent.parent
 PROCESSED = ROOT / "data" / "processed"
@@ -208,7 +207,8 @@ def main() -> int:
         "",
         "1. **引用单位错位**：字符窗口产出的是一段没有名字的文字，读者拿到「第 12 页第 3 段」"
         "无法核对；条款级切分产出的是「DOC011 第二章 第 3.4 条」，翻到那一页就能对上。",
-        "2. **结构信息丢失**：现成方案不产生章节路径与条款号，检索命中后无法解释「这是哪一章的规定」，"
+        "2. **结构信息丢失**：现成方案不产生章节路径与条款号，"
+        "检索命中后无法解释「这是哪一章的规定」，"
         "而合同纠纷往往就发生在「总则」与「专用条款」的冲突里。",
         "3. **切断语义**：按句号切会把「第X条」从中间截断，一条规定被拆到两个 chunk，"
         "两边都不完整。重叠只能缓解，不能消除。",
