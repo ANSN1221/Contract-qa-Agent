@@ -14,7 +14,7 @@
 
 | 文档 | 内容 |
 | --- | --- |
-| [docs/problems-d1-d3.pdf](docs/problems-d1-d3.pdf) | D1–D3 的 16 个真实卡点：现象、原因、处理、教训 |
+| [docs/problems/](docs/problems/) | D1–D3 的 16 个真实卡点：现象、原因、处理、教训（PDF） |
 | [docs/parse-acceptance.md](docs/parse-acceptance.md) | 解析与切分的抽样验收（569 条条款、页码命中 94.2%） |
 | [docs/splitter-comparison.md](docs/splitter-comparison.md) | 现成切分工具与本项目切分器在同一批文档上的对照实验 |
 | [docs/d3-smoke.md](docs/d3-smoke.md) | 检索与问答的冒烟记录（6 题、耗时、token） |
