@@ -39,10 +39,6 @@ def run_check() -> int:
     print("合同条款智能问答 Agent · 环境检查")
     print(f"Python: {sys.version.split()[0]}")
 
-    if sys.version_info < (3, 11):
-        print("失败：需要 Python 3.11 或更高版本。")
-        return 1
-
     missing = [name for name in REQUIRED_DIRECTORIES if not (PROJECT_ROOT / name).is_dir()]
     if missing:
         print("失败：缺少目录 " + ", ".join(missing))
@@ -65,7 +61,8 @@ def run_check() -> int:
 
 def run_parse(out_dir: Path | None) -> int:
     try:
-        from contract_qa.parse import format_report, run_parse as do_parse
+        from contract_qa.parse import format_report
+        from contract_qa.parse import run_parse as do_parse
     except ImportError as exc:  # pragma: no cover - 依赖缺失时的兜底提示
         print(f"失败：缺少依赖（{exc}）。请先安装 pymupdf：pip install pymupdf")
         return 1

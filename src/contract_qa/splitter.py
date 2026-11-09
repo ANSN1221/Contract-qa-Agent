@@ -78,7 +78,7 @@ def choose_plan(lines: list[Line]) -> SplitPlan:
     in_range = [item for item in measured if item[2] >= ACCEPTABLE_MEDIAN_CHARS]
     if in_range:
         level, plan, median = min(in_range, key=lambda item: abs(item[2] - TARGET_CLAUSE_CHARS))
-        return _selected(level, plan, median, counts, f"无 60–700 区间层级，取最接近 350 字符者")
+        return _selected(level, plan, median, counts, "无 60–700 区间层级，取最接近 350 字符者")
 
     level, plan, median = measured[0]
     return SplitPlan(
