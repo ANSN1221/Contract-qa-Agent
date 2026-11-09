@@ -14,9 +14,10 @@
 
 | 文档 | 内容 |
 | --- | --- |
+| [docs/why-custom-splitter.md](docs/why-custom-splitter.md) | 为什么不用现成切分器：对照实验、真实样例、代价与适用边界 |
 | [docs/problems/](docs/problems/) | D1–D3 的 16 个真实卡点：现象、原因、处理、教训（PDF） |
 | [docs/parse-acceptance.md](docs/parse-acceptance.md) | 解析与切分的抽样验收（569 条条款、页码命中 94.2%） |
-| [docs/splitter-comparison.md](docs/splitter-comparison.md) | 现成切分工具与本项目切分器在同一批文档上的对照实验 |
+| [docs/splitter-comparison.md](docs/splitter-comparison.md) | 现成切分工具与本项目切分器的对照数据 |
 | [docs/d3-smoke.md](docs/d3-smoke.md) | 检索与问答的冒烟记录（6 题、耗时、token） |
 | [docs/mvp-scope.md](docs/mvp-scope.md) | 范围边界：做什么、不做什么、为什么 |
 
