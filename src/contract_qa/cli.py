@@ -77,12 +77,91 @@ def run_parse(out_dir: Path | None) -> int:
     return 0
 
 
+def run_index(rebuild: bool) -> int:
+    try:
+        from contract_qa.index import build_bm25, build_chroma, load_records
+    except ImportError as exc:  # pragma: no cover
+        print(f"失败：缺少依赖（{exc}）")
+        return 1
+
+    records = load_records()
+    if not records:
+        print("失败：data/processed 下没有条款，请先运行 contract-qa parse")
+        return 1
+    print(f"条款 {len(records)} 条")
+
+    bm25_path = build_bm25(records)
+    print(f"BM25 索引：{bm25_path}")
+
+    from contract_qa.config import get_settings
+
+    settings = get_settings()
+    if not settings.has_embedding:
+        print("跳过向量索引：.env 缺少 EMBEDDING_API_KEY（BM25 索引已可用）")
+        return 0
+
+    count = build_chroma(records, settings)
+    print(f"向量索引：{count} 条 -> {settings.chroma_path}")
+    return 0
+
+
+def run_ask(question: str, top_k: int, show_hits: bool) -> int:
+    try:
+        from contract_qa.qa import answer_question
+    except ImportError as exc:  # pragma: no cover
+        print(f"失败：缺少依赖（{exc}）")
+        return 1
+
+    try:
+        result = answer_question(question, top_k=top_k)
+    except FileNotFoundError as exc:
+        print(f"失败：{exc}")
+        return 1
+    except Exception as exc:  # 网络、配额、密钥问题统一提示，不吞掉原因
+        print(f"失败：{type(exc).__name__}: {exc}")
+        return 1
+
+    print(f"\n问题：{result.question}")
+    print(f"回答：{result.answer}")
+    print(f"可答：{'是' if result.answerable else '否'}")
+
+    if result.citations:
+        print("\n引用：")
+        for index, cite in enumerate(result.citations, start=1):
+            print(f"  [{index}] {cite.label} · 第{cite.page_start}-{cite.page_end}页")
+            snippet = cite.text[:100].replace("\n", " ")
+            print(f"      {snippet}……")
+    if result.citation_violations:
+        print(f"\n警告：模型给出了候选之外的引用 {result.citation_violations}")
+
+    if show_hits:
+        print("\n召回明细：")
+        for rank, hit in enumerate(result.hits, start=1):
+            r = hit.record
+            print(
+                f"  {rank}. {r.clause_id} rrf={hit.score:.4f} "
+                f"dense={hit.dense_rank} bm25={hit.bm25_rank} — {r.clause_id} {r.clause_no}"
+            )
+    if result.usage:
+        print(
+            f"\ntokens：prompt {result.usage.prompt_tokens} / "
+            f"completion {result.usage.completion_tokens}"
+        )
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="合同条款智能问答 Agent")
     subparsers = parser.add_subparsers(dest="command")
     subparsers.add_parser("check", help="检查项目结构与数据准备状态")
     parse_cmd = subparsers.add_parser("parse", help="解析 PDF 并切分条款")
     parse_cmd.add_argument("--out", type=Path, default=None, help="输出目录，默认 data/processed")
+    index_cmd = subparsers.add_parser("index", help="建 BM25 与向量索引")
+    index_cmd.add_argument("--rebuild", action="store_true", help="强制重建（默认也重建）")
+    ask_cmd = subparsers.add_parser("ask", help="提问并返回答案与引用")
+    ask_cmd.add_argument("question", help="问题文本")
+    ask_cmd.add_argument("--top-k", type=int, default=8, help="送入模型的条款数，默认 8")
+    ask_cmd.add_argument("--show-hits", action="store_true", help="打印召回明细")
     return parser
 
 
@@ -93,6 +172,10 @@ def main() -> None:
         raise SystemExit(run_check())
     if args.command == "parse":
         raise SystemExit(run_parse(args.out))
+    if args.command == "index":
+        raise SystemExit(run_index(args.rebuild))
+    if args.command == "ask":
+        raise SystemExit(run_ask(args.question, args.top_k, args.show_hits))
     parser.error(f"未知命令：{args.command}")
 
 
