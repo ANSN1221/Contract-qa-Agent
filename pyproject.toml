@@ -1,7 +1,7 @@
 [project]
 name = "contract-qa-agent"
 version = "0.1.0"
-description = "带条款级引用、引用校验与离线评测的合同问答 Agent"
+description = "引用可核对的合同条款 RAG：条款级切分、混合检索、页码级引用"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
