@@ -5,8 +5,7 @@ from __future__ import annotations
 import unittest
 
 from contract_qa.index import tokenize
-from contract_qa.qa import _to_citations
-from contract_qa.retrieval import RRF_K, Hit
+from contract_qa.retrieval import RRF_K
 
 
 class TokenizeTest(unittest.TestCase):
@@ -45,35 +44,6 @@ class FusionTest(unittest.TestCase):
     def test_rrf_score_matches_formula(self):
         result = dict(self._fuse(["A"], ["A"]))
         self.assertAlmostEqual(result["A"], 2.0 / (RRF_K + 1))
-
-
-class CitationTest(unittest.TestCase):
-    def test_unknown_citation_is_reported_not_silently_dropped(self):
-        hit = Hit(
-            clause_id="DOC001-C0001",
-            score=0.5,
-            dense_rank=1,
-            bm25_rank=1,
-            record=_fake_record("DOC001-C0001"),
-        )
-        citations, violations = _to_citations(["DOC001-C0001", "DOC999-C9999"], [hit])
-        self.assertEqual(len(citations), 1)
-        self.assertEqual(violations, ["DOC999-C9999"])
-
-
-def _fake_record(clause_id: str):
-    from contract_qa.index import ClauseRecord
-
-    return ClauseRecord(
-        clause_id=clause_id,
-        doc_id="DOC001",
-        doc_title="测试合同",
-        clause_no="第一条",
-        chapter_path=["第一章 总则"],
-        page_start=1,
-        page_end=2,
-        text="测试条款正文",
-    )
 
 
 if __name__ == "__main__":

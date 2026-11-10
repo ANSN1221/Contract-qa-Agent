@@ -9,10 +9,10 @@ from __future__ import annotations
 import time
 from pathlib import Path
 
-from contract_qa.qa import answer_question
+from contract_qa.graph import get_graph
 
 ROOT = Path(__file__).resolve().parent.parent
-REPORT = ROOT / "docs" / "d3-smoke.md"
+REPORT = ROOT / "docs" / "smoke.md"
 
 QUESTIONS = [
     ("事实型", "宁国市垃圾中转站项目的合同总价是多少？"),
@@ -31,16 +31,18 @@ def main() -> int:
 
     for kind, question in QUESTIONS:
         started = time.perf_counter()
-        result = answer_question(question)
+        result = get_graph().ask(question)
         elapsed = time.perf_counter() - started
         total_tokens += result.tokens
         answerable_hits += int(result.answerable)
         cites = "、".join(
-            f"{c.label}（第{c.page_start}-{c.page_end}页）" for c in result.citations
+            f"{c['label']}（第{c['page_start']}-{c['page_end']}页）" for c in result.citations
         ) or "—"
         rows.append(
             {
                 "kind": kind,
+                "route": result.route,
+                "queries": " / ".join(result.queries) or "—",
                 "question": question,
                 "answer": result.answer,
                 "cites": cites,
@@ -51,20 +53,21 @@ def main() -> int:
         )
 
     lines = [
-        "# D3 冒烟测试记录",
+        "# 冒烟测试记录（最新基线）",
         "",
         "> 由 `scripts/smoke_ask.py` 生成，指标为本次真实运行结果，未做人工修正。",
         "> 语料：10 份可解析文档、569 条条款；"
         "检索：BM25 + bge-m3 向量，加权 RRF（BM25 1.0 / 向量 0.5）；",
         "> 生成：DeepSeek deepseek-chat，候选 8 条。",
         "",
-        "| 类型 | 问题 | 回答 | 引用 | 可答 | 耗时(s) | tokens |",
-        "| --- | --- | --- | --- | --- | ---: | ---: |",
+        "| 类型 | 问题 | 路由 | 改写查询 | 回答 | 引用 | 可答 | 耗时(s) | tokens |",
+        "| --- | --- | --- | --- | --- | --- | --- | ---: | ---: |",
     ]
     for row in rows:
         lines.append(
-            f"| {row['kind']} | {row['question']} | {row['answer']} | {row['cites']} | "
-            f"{row['answerable']} | {row['latency']:.2f} | {row['tokens']} |"
+            f"| {row['kind']} | {row['question']} | {row['route']} | {row['queries']} | "
+            f"{row['answer']} | {row['cites']} | {row['answerable']} | "
+            f"{row['latency']:.2f} | {row['tokens']} |"
         )
 
     lines += [

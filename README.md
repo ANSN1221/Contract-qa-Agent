@@ -5,10 +5,11 @@
 
 ## 当前状态
 
-**D3：检索与最小问答闭环完成。** 569 条条款已建 BM25 + 向量双路索引，命令行可提问并返回
-带条款号与页码的引用。冒烟结果见 `docs/d3-smoke.md`，解析验收见 `docs/parse-acceptance.md`。
+**D4：主链路改为状态机。** route（判断问题是否属于合同域）→ rewrite（改写查询、拆复合问题）
+→ retrieve（双路召回 + RRF）→ generate（严格 JSON，malformed 自动重试一次）。
+冒烟结果见 `docs/smoke.md`，解析验收见 `docs/parse-acceptance.md`。
 
-进度：D1 骨架 ✓ · D2 解析与切分 ✓ · D3 索引与 CLI 问答 ✓
+进度：D1 骨架 ✓ · D2 解析与切分 ✓ · D3 索引与检索 ✓ · D4 四节点主链路 ✓
 
 ## 文档
 
@@ -18,7 +19,7 @@
 | [docs/problems/](docs/problems/) | D1–D3 的 16 个真实卡点：现象、原因、处理、教训（PDF） |
 | [docs/parse-acceptance.md](docs/parse-acceptance.md) | 解析与切分的抽样验收（569 条条款、页码命中 94.2%） |
 | [docs/splitter-comparison.md](docs/splitter-comparison.md) | 现成切分工具与本项目切分器的对照数据 |
-| [docs/d3-smoke.md](docs/d3-smoke.md) | 检索与问答的冒烟记录（6 题、耗时、token） |
+| [docs/smoke.md](docs/smoke.md) | 冒烟记录（6 题、路由、改写查询、耗时、token） |
 | [docs/mvp-scope.md](docs/mvp-scope.md) | 范围边界：做什么、不做什么、为什么 |
 
 ## MVP
@@ -26,6 +27,7 @@
 - PDF 入库与条款级切分：已完成
 - BM25 + 向量混合检索、RRF 融合：已完成
 - 单文档问答与强制条款引用：已完成
+- 路由、查询改写、复合问题拆解：已完成
 - 重排（rerank）与引用校验、最多 2 轮回退：进行中
 - 60 条离线评测集与指标报告
 - Streamlit 溯源界面
@@ -87,7 +89,7 @@ src/contract_qa/
   parse.py          解析编排与 JSONL 输出
   index.py          BM25 与 Chroma 向量索引
   retrieval.py      双路召回 + 加权 RRF 融合
-  qa.py             问答与引用构造
+  graph.py          四节点状态机（route/rewrite/retrieve/generate）
   llm.py            OpenAI 兼容客户端（向量化 + 对话）
   config.py         .env 加载
   cli.py            命令行入口
@@ -124,11 +126,13 @@ BM25 权重高于向量，是本项目语料上的实测结论：bge-m3 对「�
 Recall@5、引用正确率、不可答硬答率、P95 延迟与成本只记录实测结果。
 计划书中的数字仅是示例，不得直接写入简历或 README。
 
-## 下一步：D4–D6
+## 下一步：D5–D6
 
-D4 加 route / rewrite / generate 节点与严格 JSON 输出；D5 接 rerank；D6 加 verify 节点
-做引用校验与最多 2 轮回退。当前基线：569 条条款、冒烟 6 题中 4 题可答、2 题正确拒答、
-平均 1.84 秒、单题约 3.3k tokens。
+D5 接 rerank 并跑 15 条种子题测 Recall@5；D6 加 verify 节点做引用校验与最多 2 轮回退。
+当前基线：569 条条款、冒烟 6 题中 4 题可答、2 题正确拒答、平均 3.65 秒、单题约 3.6k tokens。
+
+链路从 D3 的单次检索变成四节点后，平均耗时从 1.84 秒升到 3.65 秒——多出来的两次 LLM 调用
+（route 与 rewrite）换来的是：无关问题 1.15 秒直接短路不检索、复合问题能拆成两问分别召回。
 
 ## License
 

@@ -107,13 +107,13 @@ def run_index(rebuild: bool) -> int:
 
 def run_ask(question: str, top_k: int, show_hits: bool) -> int:
     try:
-        from contract_qa.qa import answer_question
+        from contract_qa.graph import get_graph
     except ImportError as exc:  # pragma: no cover
         print(f"失败：缺少依赖（{exc}）")
         return 1
 
     try:
-        result = answer_question(question, top_k=top_k)
+        result = get_graph().ask(question)
     except FileNotFoundError as exc:
         print(f"失败：{exc}")
         return 1
@@ -122,17 +122,22 @@ def run_ask(question: str, top_k: int, show_hits: bool) -> int:
         return 1
 
     print(f"\n问题：{result.question}")
+    print(f"路由：{result.route}" + (f"（{result.route_reason}）" if result.route_reason else ""))
+    if result.queries:
+        print(f"改写：{' / '.join(result.queries)}")
     print(f"回答：{result.answer}")
     print(f"可答：{'是' if result.answerable else '否'}")
 
     if result.citations:
         print("\n引用：")
         for index, cite in enumerate(result.citations, start=1):
-            print(f"  [{index}] {cite.label} · 第{cite.page_start}-{cite.page_end}页")
-            snippet = cite.text[:100].replace("\n", " ")
+            print(f"  [{index}] {cite['label']} · 第{cite['page_start']}-{cite['page_end']}页")
+            snippet = str(cite["text"])[:100].replace("\n", " ")
             print(f"      {snippet}……")
     if result.citation_violations:
         print(f"\n警告：模型给出了候选之外的引用 {result.citation_violations}")
+    if result.error:
+        print(f"\n降级：{result.error}（尝试 {result.attempts} 次）")
 
     if show_hits:
         print("\n召回明细：")
@@ -140,13 +145,12 @@ def run_ask(question: str, top_k: int, show_hits: bool) -> int:
             r = hit.record
             print(
                 f"  {rank}. {r.clause_id} rrf={hit.score:.4f} "
-                f"dense={hit.dense_rank} bm25={hit.bm25_rank} — {r.clause_id} {r.clause_no}"
+                f"dense={hit.dense_rank} bm25={hit.bm25_rank} — {r.clause_no}"
             )
-    if result.usage:
-        print(
-            f"\ntokens：prompt {result.usage.prompt_tokens} / "
-            f"completion {result.usage.completion_tokens}"
-        )
+    timing = " ".join(f"{k}={v:.2f}s" for k, v in result.timings.items())
+    print(f"\ntokens：prompt {result.prompt_tokens} / completion {result.completion_tokens}")
+    if timing:
+        print(f"节点耗时：{timing}")
     return 0
 
 
