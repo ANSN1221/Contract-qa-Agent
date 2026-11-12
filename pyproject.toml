@@ -7,6 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
   "chromadb>=0.5,<2",
   "langgraph>=0.2,<1",
+  "numpy>=1.26,<3",
   "pydantic>=2.9,<3",
   "pymupdf>=1.24,<2",
   "rank-bm25>=0.2.2,<1",
@@ -19,6 +20,7 @@ contract-qa = "contract_qa.cli:main"
 
 [dependency-groups]
 dev = [
+  "langchain-text-splitters>=0.3,<2",
   "pytest>=8,<9",
   "ruff>=0.8,<1",
 ]

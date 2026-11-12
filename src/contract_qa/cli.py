@@ -36,7 +36,7 @@ def read_register() -> list[dict[str, str]]:
 
 def run_check() -> int:
     """Check the scaffold; missing source documents are reported, not treated as an error."""
-    print("合同条款智能问答 Agent · 环境检查")
+    print("合同条款智能问答 · 环境检查")
     print(f"Python: {sys.version.split()[0]}")
 
     missing = [name for name in REQUIRED_DIRECTORIES if not (PROJECT_ROOT / name).is_dir()]
@@ -155,7 +155,7 @@ def run_ask(question: str, top_k: int, show_hits: bool) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="合同条款智能问答 Agent")
+    parser = argparse.ArgumentParser(description="合同条款智能问答：引用可核对的合同条款 RAG")
     subparsers = parser.add_subparsers(dest="command")
     subparsers.add_parser("check", help="检查项目结构与数据准备状态")
     parse_cmd = subparsers.add_parser("parse", help="解析 PDF 并切分条款")
