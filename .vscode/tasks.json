@@ -1,0 +1,50 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "01 环境检查",
+      "type": "shell",
+      "command": "uv run contract-qa check",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "02 跑测试",
+      "type": "shell",
+      "command": "uv run pytest -q",
+      "problemMatcher": [],
+      "group": { "kind": "test", "isDefault": true }
+    },
+    {
+      "label": "03 代码检查",
+      "type": "shell",
+      "command": "uv run ruff check .",
+      "problemMatcher": []
+    },
+    {
+      "label": "04 解析 PDF",
+      "type": "shell",
+      "command": "uv run contract-qa parse",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "05 重建索引",
+      "type": "shell",
+      "command": "uv run contract-qa index",
+      "problemMatcher": []
+    },
+    {
+      "label": "06 冒烟测试（6 题，会调模型）",
+      "type": "shell",
+      "command": "uv run python scripts/smoke_ask.py",
+      "problemMatcher": []
+    },
+    {
+      "label": "07 切分方案对照实验",
+      "type": "shell",
+      "command": "uv run python scripts/compare_splitter.py",
+      "problemMatcher": []
+    }
+  ]
+}

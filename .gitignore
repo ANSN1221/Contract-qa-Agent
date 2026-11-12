@@ -26,5 +26,6 @@ chroma/
 # OS / editors
 .DS_Store
 Thumbs.db
-.vscode/
+# .vscode/ 提交共享配置，仅忽略个人覆盖文件
+.vscode/*.local.json
 .idea/

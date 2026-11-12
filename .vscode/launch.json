@@ -1,0 +1,76 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "问一句（输入问题）",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "contract_qa",
+      "args": ["ask", "${input:question}"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "问一句（带召回明细）",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "contract_qa",
+      "args": ["ask", "${input:question}", "--show-hits"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "环境检查",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "contract_qa",
+      "args": ["check"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "重建索引",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "contract_qa",
+      "args": ["index"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "调试当前文件",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "调试当前测试文件",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["${file}", "-v"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ],
+  "inputs": [
+    {
+      "id": "question",
+      "type": "promptString",
+      "description": "要问的问题",
+      "default": "投标保证金是多少钱？"
+    }
+  ]
+}
